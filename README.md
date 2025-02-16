@@ -1,2 +1,5 @@
-# LC-Telegram
+###  LC-Telegram
+
 Telegram update for LeetCode
+
+
