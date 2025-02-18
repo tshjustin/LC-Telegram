@@ -1,16 +1,31 @@
 import os 
-from typing import Final 
-from telegram import Update
+import asyncio
+from telegram import Bot
 from dotenv import load_dotenv 
-from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
+from lc_api import get_leetcode_daily_question
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE): 
-    await update.message.reply_text("Let the Grind start :)") # /start
+load_dotenv()
 
-async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE): 
-    await update.message.reply_text("Provides Daily update at 08:30 SGD time for Daily Leetcode Problem") # /help
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+TELEGRAM_BOT_USERNAME = os.getenv("TELEGRAM_BOT_USERNAME")
 
+async def send_telegram_message():
+    bot = Bot(token=TELEGRAM_BOT_TOKEN)
+    question = get_leetcode_daily_question()
+    await bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=question, parse_mode="Markdown")
 
-# Responses 
-def handle_responses(text: str) -> str: 
-    pass 
+def schedule_daily_message():
+    scheduler = AsyncIOScheduler()
+    scheduler.add_job(send_telegram_message, "cron", hour=9, minute=0)
+    scheduler.start()
+
+if __name__ == "__main__":
+    
+    schedule_daily_message()
+
+    try:
+        asyncio.get_event_loop().run_forever()
+    except (KeyboardInterrupt, SystemExit):
+        print("Bot stopped")
