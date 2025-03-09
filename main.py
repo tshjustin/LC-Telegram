@@ -1,4 +1,5 @@
 import os 
+import pytz
 import asyncio
 from telegram import Bot
 from dotenv import load_dotenv 
@@ -30,7 +31,7 @@ async def send_sanity_check_message():
     await send_telegram_message()
 
 async def main(): # for just simple CRON jobs and no event listener, no need for application_BUILD
-    scheduler = AsyncIOScheduler()
+    scheduler = AsyncIOScheduler(timezone=pytz.timezone('Asia/Singapore'))
     scheduler.add_job(send_telegram_message, "cron", hour=9, minute=0)
     scheduler.start()
 
